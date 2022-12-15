@@ -4,9 +4,13 @@ const axios = require("axios");
 var cors = require("cors");
 const router = express();
 const port = process.env.PORT || 3000;
-const key = process.env.CLOUD_KEY || "AIzaSyDCexXO8DveogiOjw0SGJeShWKW3ENmL-c";
+const key = process.env.CLOUD_KEY;
 
-router.use(cors());
+const corsOptions = {
+  origin: "*",
+};
+
+router.use(cors(corsOptions));
 router.use(bodyParser.json({ limit: "50mb" }));
 // router.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 router.post("/api", async (req, res, next) => {
