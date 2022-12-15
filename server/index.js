@@ -15,7 +15,7 @@ const corsOptions = {
 router.use(cors(corsOptions));
 router.use(bodyParser.json({ limit: "50mb" }));
 // router.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
-router.post("/api", async (req, res, next) => {
+router.post("/", async (req, res, next) => {
   try {
     res.send(await main(req.body.img, req.body.language));
   } catch (ex) {
