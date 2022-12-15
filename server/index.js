@@ -8,6 +8,8 @@ const key = process.env.CLOUD_KEY;
 
 const corsOptions = {
   origin: "*",
+  methods: ["POST"],
+  allowedHeaders: ["Content-Type"],
 };
 
 router.use(cors(corsOptions));
