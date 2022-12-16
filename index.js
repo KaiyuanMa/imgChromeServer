@@ -74,18 +74,23 @@ async function translateBlocks(rowBlocks, block, detectedLanguage, language) {
   currBlock.vertices = block.boundingBox.vertices;
   let text = "";
   let fontSize = "";
+  let counter = 0;
   for (let i = 0; i < block.paragraphs.length; i++) {
     block.paragraphs[i].words.map((word) => {
       word.symbols.map((symbol) => {
-        if (fontSize == "" && symbol.text.length == 1) {
-          fontSize = Math.abs(
-            symbol.boundingBox.vertices[0].y - symbol.boundingBox.vertices[2].y
+        if ((fontSize == "" && symbol.text.length == 1) || counter < 5) {
+          fontSize = Math.max(
+            Math.abs(
+              symbol.boundingBox.vertices[0].y -
+                symbol.boundingBox.vertices[2].y
+            ),
+            fontSize
           );
+          counter++;
         }
         text += symbol.text;
       });
       if (detectedLanguage.languageCode == "en") {
-        console.log(1);
         text += " ";
       }
     });
