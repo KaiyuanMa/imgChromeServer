@@ -40,7 +40,7 @@ router.post("/", async (req, res, next) => {
 async function main(imageBase64, incomeLanguage, outcomeLanguage) {
   const response = await getText(incomeLanguage, imageBase64);
   let rowBlocks = [];
-  console.log(response.language);
+  // console.log(response.language);
   for (let block of response.blocks) {
     await translateBlocks(rowBlocks, block, incomeLanguage, outcomeLanguage);
   }
@@ -110,7 +110,7 @@ async function translateBlocks(
       }
     });
   }
-  console.log(text);
+  // console.log(text);
   text = await translateText(text, incomeLanguage, outcomeLanguage);
   currBlock.text = text;
   currBlock.fontSize = fontSize;
