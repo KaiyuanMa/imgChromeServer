@@ -24,25 +24,31 @@ router.get("/", (req, res) => {
 
 router.post("/", async (req, res, next) => {
   try {
-    res.send(await main(req.body.img, req.body.language));
+    res.send(
+      await main(
+        req.body.img,
+        req.body.incomeLanguage,
+        req.body.outcomeLanguage
+      )
+    );
   } catch (ex) {
     next(ex);
   }
 });
 
 //main
-async function main(imageBase64, language) {
-  const response = await getText(imageBase64);
+async function main(imageBase64, incomeLanguage, outcomeLanguage) {
+  const response = await getText(incomeLanguage, imageBase64);
   let rowBlocks = [];
   console.log(response.language);
   for (let block of response.blocks) {
-    await translateBlocks(rowBlocks, block, response.language[0], language);
+    await translateBlocks(rowBlocks, block, incomeLanguage, outcomeLanguage);
   }
   return { rowBlocks: rowBlocks, language: response.language };
 }
 
 //Get text blocks
-const getText = async (imageBase64) => {
+const getText = async (incomeLanguage, imageBase64) => {
   return axios
     .post(`https://vision.googleapis.com/v1/images:annotate?key=${key}`, {
       requests: [
@@ -55,6 +61,9 @@ const getText = async (imageBase64) => {
               type: "TEXT_DETECTION",
             },
           ],
+          imageContext: {
+            languageHints: [incomeLanguage],
+          },
         },
       ],
     })
@@ -69,7 +78,12 @@ const getText = async (imageBase64) => {
 };
 
 //translate text blocks
-async function translateBlocks(rowBlocks, block, detectedLanguage, language) {
+async function translateBlocks(
+  rowBlocks,
+  block,
+  incomeLanguage,
+  outcomeLanguage
+) {
   const currBlock = {};
   currBlock.vertices = block.boundingBox.vertices;
   let text = "";
@@ -90,13 +104,14 @@ async function translateBlocks(rowBlocks, block, detectedLanguage, language) {
         }
         text += symbol.text;
       });
-      if (detectedLanguage.languageCode == "en") {
+      const noSpaceLanguage = ["zh", "ja", "ko"];
+      if (!noSpaceLanguage.includes(incomeLanguage)) {
         text += " ";
       }
     });
   }
   console.log(text);
-  text = await translateText(text, language);
+  text = await translateText(text, incomeLanguage, outcomeLanguage);
   currBlock.text = text;
   currBlock.fontSize = fontSize;
   rowBlocks.push(currBlock);
@@ -104,13 +119,13 @@ async function translateBlocks(rowBlocks, block, detectedLanguage, language) {
 }
 
 //translate text
-const translateText = async (text, outcomeLanguage) => {
+const translateText = async (text, incomeLanguage, outcomeLanguage) => {
   return axios
     .post(
       `https://translation.googleapis.com/language/translate/v2?key=${key}`,
       {
         q: text,
-        source: "ja",
+        source: incomeLanguage,
         target: outcomeLanguage,
       }
     )
